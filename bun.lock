@@ -381,6 +381,21 @@
         "drizzle-kit": "catalog:",
       },
     },
+    "packages/designer-browser": {
+      "name": "@opencode-ai/designer-browser",
+      "version": "1.18.29",
+      "dependencies": {
+        "@opencode-ai/ui": "workspace:*",
+        "solid-js": "catalog:",
+      },
+      "devDependencies": {
+        "@happy-dom/global-registrator": "20.12.0",
+        "@tsconfig/bun": "catalog:",
+        "@types/bun": "catalog:",
+        "@typescript/native-preview": "catalog:",
+        "electron": "42.3.3",
+      },
+    },
     "packages/desktop": {
       "name": "@opencode-ai/desktop",
       "version": "1.18.30",
@@ -398,6 +413,7 @@
         "@actions/artifact": "4.0.0",
         "@lydell/node-pty": "catalog:",
         "@opencode-ai/app": "workspace:*",
+        "@opencode-ai/designer-browser": "workspace:*",
         "@opencode-ai/ui": "workspace:*",
         "@sentry/solid": "catalog:",
         "@sentry/vite-plugin": "catalog:",
@@ -1963,6 +1979,8 @@
     "@opencode-ai/console-support": ["@opencode-ai/console-support@workspace:packages/console/support"],
 
     "@opencode-ai/core": ["@opencode-ai/core@workspace:packages/core"],
+
+    "@opencode-ai/designer-browser": ["@opencode-ai/designer-browser@workspace:packages/designer-browser"],
 
     "@opencode-ai/desktop": ["@opencode-ai/desktop@workspace:packages/desktop"],
 

@@ -15,7 +15,9 @@ import {
   useWslServers,
   useLanguage,
 } from "@opencode-ai/app"
+import { notifyComposerInsert } from "@opencode-ai/app/composer-events"
 import type { UpdaterState } from "@opencode-ai/app/updater"
+import { DesignerBrowserSplit } from "@opencode-ai/designer-browser/split"
 import * as Sentry from "@sentry/solid"
 import type { AsyncStorage } from "@solid-primitives/storage"
 import { createMemoryHistory, MemoryRouter, type BaseRouterProps } from "@solidjs/router"
@@ -404,20 +406,27 @@ function DesktopRoot(props: { windowState: DesktopWindowState }) {
       <Show when={ready()} fallback={<LoadingSplash />}>
         <Show when={effectiveDefaultServer()} keyed>
           {(key) => (
-            <AppInterface
-              defaultServer={key}
-              servers={servers()}
-              router={router}
-              startup={onboarding.promise}
-              serverScoped={
-                <DesktopFirstLaunchOnboarding
-                  initialUrl={getLastActiveUrl(platform.windowID ?? "browser")}
-                  onLoaded={onboarding.resolve}
-                />
-              }
+            <DesignerBrowserSplit
+              bridge={window.api.designerBrowser}
+              zoomFactor={webviewZoom}
+              remeasureOn={windowFullscreen}
+              onElementPicked={(text) => notifyComposerInsert({ text })}
             >
-              <Inner />
-            </AppInterface>
+              <AppInterface
+                defaultServer={key}
+                servers={servers()}
+                router={router}
+                startup={onboarding.promise}
+                serverScoped={
+                  <DesktopFirstLaunchOnboarding
+                    initialUrl={getLastActiveUrl(platform.windowID ?? "browser")}
+                    onLoaded={onboarding.resolve}
+                  />
+                }
+              >
+                <Inner />
+              </AppInterface>
+            </DesignerBrowserSplit>
           )}
         </Show>
       </Show>

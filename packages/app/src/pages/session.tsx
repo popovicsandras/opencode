@@ -39,6 +39,7 @@ import { Button } from "@opencode-ai/ui/button"
 import { showToast } from "@/utils/toast"
 import { base64Encode, checksum } from "@opencode-ai/core/util/encode"
 import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router"
+import { ComposerInsertBridge } from "@/components/composer-insert-bridge"
 import { NewSessionView, SessionHeader } from "@/components/session"
 import { ErrorPage } from "@/pages/error"
 import { CommentsProvider, useComments } from "@/context/comments"
@@ -319,6 +320,7 @@ function SessionProviders(props: ParentProps) {
     <TerminalProvider>
       <FileProvider>
         <PromptProvider>
+          <ComposerInsertBridge />
           <CommentsProvider>{props.children}</CommentsProvider>
         </PromptProvider>
       </FileProvider>

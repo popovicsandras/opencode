@@ -38,6 +38,7 @@ import {
 } from "solid-js"
 import { Dynamic } from "solid-js/web"
 import { makeEventListener } from "@solid-primitives/event-listener"
+import { ComposerInsertBridge } from "@/components/composer-insert-bridge"
 import { CommandProvider, useCommand, type CommandOption } from "@/context/command"
 import { CommentsProvider } from "@/context/comments"
 import { FileProvider } from "@/context/file"
@@ -384,6 +385,7 @@ function DraftProviders(props: ParentProps) {
   return (
     <FileProvider>
       <PromptProvider>
+        <ComposerInsertBridge />
         <CommentsProvider>{props.children}</CommentsProvider>
       </PromptProvider>
     </FileProvider>

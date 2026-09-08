@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@opencode-ai/designer-browser",
+  "private": true,
+  "version": "1.18.29",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    "./contract": "./src/contract.ts",
+    "./registry": "./src/registry.ts",
+    "./layout": "./src/layout.ts",
+    "./main": "./src/main.ts",
+    "./preload": "./src/preload.ts",
+    "./split": "./src/split.tsx",
+    "./element-reference": "./src/element-reference.ts",
+    "./picker": "./src/picker.ts"
+  },
+  "scripts": {
+    "typecheck": "tsgo --noEmit",
+    "test": "bun test src --only-failures --preload ./happydom.ts"
+  },
+  "dependencies": {
+    "@opencode-ai/ui": "workspace:*",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "20.12.0",
+    "@tsconfig/bun": "catalog:",
+    "@types/bun": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "electron": "42.3.3"
+  }
+}

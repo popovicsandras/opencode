@@ -1,3 +1,5 @@
+import { DESIGNER_BROWSER_MODE } from "@opencode-ai/designer-browser/contract"
+import { designerBrowserRegistry } from "@opencode-ai/designer-browser/main"
 import windowState from "electron-window-state"
 import { resolveThemeVariant } from "@opencode-ai/ui/theme/resolve"
 import type { DesktopTheme } from "@opencode-ai/ui/theme/types"
@@ -201,12 +203,20 @@ export function createMainWindow(id: string = randomUUID()) {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      // Only used by the designer browser pane in webview mode; the guest
+      // inherits this window's sandbox/contextIsolation/nodeIntegration, so
+      // enabling the tag does not weaken the app window itself. Guest
+      // hardening lives in `setupDesignerBrowser()` (designer-browser/main).
+      webviewTag: true,
     },
   })
 
   allowRendererPermissions(win)
   wireWindowRecovery(win, id)
   wireNavigationPolicy(win)
+  // Native mode only: webview mode's pane is a DOM element hardened by
+  // `setupDesignerBrowser()`, not a controller attached to the window.
+  if (DESIGNER_BROWSER_MODE === "native") designerBrowserRegistry.attach(win)
 
   win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details

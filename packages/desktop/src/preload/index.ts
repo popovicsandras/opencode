@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron"
 import type { ElectronAPI, WslServersEvent } from "./types"
 import type { UpdaterState } from "@opencode-ai/app/updater"
+import { createDesignerBrowserPreloadApi } from "@opencode-ai/designer-browser/preload"
 
 const updaterCallbacks = new Set<(state: UpdaterState) => void>()
 let updaterState: UpdaterState | undefined
@@ -14,6 +15,7 @@ const api: ElectronAPI = {
   killSidecar: () => ipcRenderer.invoke("kill-sidecar"),
   installCli: () => ipcRenderer.invoke("install-cli"),
   awaitInitialization: () => ipcRenderer.invoke("await-initialization"),
+  designerBrowser: createDesignerBrowserPreloadApi(),
   wslServers: {
     getState: () => ipcRenderer.invoke("wsl-servers-get-state"),
     subscribe: (cb) => {

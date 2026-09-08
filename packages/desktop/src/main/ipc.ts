@@ -1,3 +1,4 @@
+import { setupDesignerBrowser } from "@opencode-ai/designer-browser/main"
 import { execFile } from "node:child_process"
 import { stat } from "node:fs/promises"
 import { basename, join } from "node:path"
@@ -55,6 +56,8 @@ type Deps = {
 }
 
 export function registerIpcHandlers(deps: Deps) {
+  setupDesignerBrowser()
+
   const drafts = createDesktopDraftStore(join(app.getPath("userData"), "drafts.sqlite"))
   const updaterSubscriptions = createUpdaterSubscriptions()
   app.once("will-quit", updaterSubscriptions.clear)
