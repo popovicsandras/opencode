@@ -187,6 +187,85 @@ in [element-picker.md](element-picker.md).
 
 ---
 
+## Toggling visibility from the chat composer
+
+The pane can be hidden and re-shown from a button in the chat composer. The
+hard part isn't the button — it's that the composer and the pane are two
+separate component trees, joined only once, in
+`packages/desktop/src/renderer/index.tsx`:
+
+```
+<DesignerBrowserSplit ...>
+  <AppInterface ...>
+    <Inner />
+  </AppInterface>
+</DesignerBrowserSplit>
+```
+
+`packages/app` (the composer's package) has no dependency on
+`packages/designer-browser` and shouldn't gain one just for this — the two
+packages know nothing about each other by design, joined only by the desktop
+renderer. That renderer already solved the mirror-image problem for the
+element picker: `DesignerBrowserSplit` calls an `onElementPicked` prop, which
+`renderer/index.tsx` turns into a `window` `CustomEvent`
+(`packages/app/src/components/composer-events.ts`) that the composer listens
+for. This feature reuses that idiom in the other direction.
+
+**`DesignerBrowserSplit` is a plain controlled component for visibility.**
+Unlike `width`, which the component owns and persists itself, `visible` is
+just a prop (`split.tsx`), defaulting to `true`. The right-hand pane's outer
+`<div>` is wrapped in `<Show when={props.visible ?? true}>`; the left pane's
+existing `flex-1` fills the freed width with no other layout change. The
+source of truth lives in `renderer/index.tsx`, the one place already wiring
+this feature together.
+
+**Two events, not one, cross the boundary**, defined in
+`packages/ui/src/components/designer-browser-events.tsx` (not in
+`packages/app` or `packages/designer-browser` — `session-ui` cannot depend on
+`packages/app`, and `designer-browser` has no reason to depend on either;
+`packages/ui` is the one package both already depend on):
+
+- `opencode:designer-browser-toggle` — dispatched by the composer button on
+  click, listened for in `renderer/index.tsx`, which flips its `browserVisible`
+  signal and passes it down as the `visible` prop.
+- `opencode:designer-browser-visibility` — dispatched by `renderer/index.tsx`
+  in a `createEffect` on that same signal (so it also fires once on mount),
+  carrying `{ visible: boolean }`. The button listens for this to keep its own
+  local pressed-state in sync, so a second toggle button (or any future one)
+  would stay consistent without another wiring path.
+
+**The button only renders on desktop.** `PromptInputV2Composer`
+(`packages/app/src/components/prompt-input-v2.tsx`) passes
+`showBrowserToggle={platform.platform === "desktop"}` down into session-ui's
+`PromptInputV2`. Without this, the button would render — and its click would
+dispatch a `CustomEvent` nobody listens to — on the web and VS Code targets,
+which never mount `DesignerBrowserSplit`.
+
+**Rejected/deferred:**
+
+- *Prop-drilling the signal instead of events.* The button lives many layers
+  deep (`session.tsx` → `prompt-input-v2.tsx` → session-ui's
+  `prompt-input/index.tsx`); threading a live signal that far, in both
+  directions, is exactly the shape of problem the existing `onElementPicked` /
+  `composer-events.ts` pair already solves with events. Introducing a second
+  mechanism for the mirror-image problem would be inconsistent for no benefit.
+- *Persisting the visibility preference*, the way `layout.ts` persists
+  `width`. Not implemented — the feature wasn't asked to remember state across
+  sessions, and doing so would need a decision about how it interacts with
+  `ResizeHandle`'s drag-to-collapse (below), which isn't wired up either.
+- *Wiring `ResizeHandle`'s existing `collapseThreshold`/`onCollapse`* (already
+  used for the terminal panel elsewhere in the app, unused here) to this same
+  `visible` state. Dragging the divider and clicking the button are
+  independent today; the ResizeHandle continues to only affect `width`.
+- *Native-mode visibility.* `<Show>` on the DOM div is sufficient today because
+  `DESIGNER_BROWSER_MODE` is hard-coded to `"webview"` (an Electron `<webview>`
+  is a normal DOM element, so hiding its container hides it). If native mode
+  is ever revived, hiding the pane's `<div>` would **not** hide the
+  `WebContentsView` — that's an OS-composited layer positioned by IPC bounds,
+  independent of the DOM — so `props.bridge?.hide()`/`show()` would need to be
+  called alongside the `visible` prop. Recorded here so whoever revives native
+  mode (see the open decision below) doesn't rediscover this the hard way.
+
 ## Native mode: what it still costs
 
 Native mode needs continuous measurement that webview mode does not: a
@@ -222,5 +301,5 @@ the bounds maths, and three otherwise-unneeded props on the split component
    can promise.
 4. **Electron upgrade policy.** `<webview>` carries deprecation risk. At
    minimum, re-verify `will-attach-webview` semantics and
-   `getType() === "webview"` on each upgrade; the rebase checklist in
-   [docs/DEVIATION-FROM-CORE.md](../../docs/DEVIATION-FROM-CORE.md) covers this.
+   `getType() === "webview"` on each upgrade; the rebase notes in
+   [deviations/preview-pane.md](../deviations/preview-pane.md) cover this.

@@ -29,10 +29,22 @@ and it is the single most important acceptance criterion for this feature.
 Nothing in the pane should invite browsing. The absence of browser chrome is
 the point, not an unfinished edge.
 
+## Hiding it
+
+The designer can hide the preview from a button in the chat composer, next to
+send/stop, and bring it back with the same control. This is about reclaiming
+width for the chat, not about the preview being optional or a secondary
+window — the split-view framing in
+[split-view.md](split-view.md) still holds; hiding the pane is a deliberate,
+explicit action, not a state the app wanders into on its own. The preference
+is not remembered between sessions today: every new session starts with the
+preview showing.
+
 ## Where we are
 
 Built. The pane renders, navigates, and is fully interactive, and app overlays
-paint above it correctly.
+paint above it correctly. It can be hidden and re-shown from the chat
+composer.
 
 The destination is currently a fixed placeholder so we could validate the shape
 of the experience before wiring it to a real prototype. Right-click menus and
@@ -47,3 +59,5 @@ browser.
 - What the preview should actually point at, and how the destination gets
   chosen. See also the project-level question about what kinds of prototypes
   designers will bring, in [foundations.md](foundations.md).
+- Whether the hidden/shown preference should persist across sessions, the way
+  the pane's width already does.

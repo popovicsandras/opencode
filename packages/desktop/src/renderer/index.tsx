@@ -18,10 +18,14 @@ import {
 import { notifyComposerInsert } from "@opencode-ai/app/composer-events"
 import type { UpdaterState } from "@opencode-ai/app/updater"
 import { DesignerBrowserSplit } from "@opencode-ai/designer-browser/split"
+import {
+  DESIGNER_BROWSER_TOGGLE_EVENT,
+  notifyDesignerBrowserVisibility,
+} from "@opencode-ai/ui/designer-browser-events"
 import * as Sentry from "@sentry/solid"
 import type { AsyncStorage } from "@solid-primitives/storage"
 import { createMemoryHistory, MemoryRouter, type BaseRouterProps } from "@solidjs/router"
-import { createEffect, createMemo, createResource, createSignal, onCleanup, Show } from "solid-js"
+import { createEffect, createMemo, createResource, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { render } from "solid-js/web"
 import pkg from "../../package.json"
 import { t } from "./i18n"
@@ -402,6 +406,15 @@ function DesktopRoot(props: { windowState: DesktopWindowState }) {
     const effectiveDefaultServer = createMemo(() =>
       ServerConnection.Key.make(availableStartupServer(defaultServer.latest, wslServers.data)),
     )
+    const [browserVisible, setBrowserVisible] = createSignal(true)
+    onMount(() => {
+      const handleToggleRequest = () => setBrowserVisible((visible) => !visible)
+      window.addEventListener(DESIGNER_BROWSER_TOGGLE_EVENT, handleToggleRequest)
+      onCleanup(() => window.removeEventListener(DESIGNER_BROWSER_TOGGLE_EVENT, handleToggleRequest))
+    })
+    createEffect(() => {
+      notifyDesignerBrowserVisibility({ visible: browserVisible() })
+    })
     return (
       <Show when={ready()} fallback={<LoadingSplash />}>
         <Show when={effectiveDefaultServer()} keyed>
@@ -410,6 +423,7 @@ function DesktopRoot(props: { windowState: DesktopWindowState }) {
               bridge={window.api.designerBrowser}
               zoomFactor={webviewZoom}
               remeasureOn={windowFullscreen}
+              visible={browserVisible()}
               onElementPicked={(text) => notifyComposerInsert({ text })}
             >
               <AppInterface

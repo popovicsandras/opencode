@@ -64,8 +64,9 @@ param sanitisation) is unit tested with no mocks. **Keep that property.**
 
 ## Upstream touch points
 
-All additive. The maintained table with per-file reasoning is in
-[docs/DEVIATION-FROM-CORE.md](../../docs/DEVIATION-FROM-CORE.md), which is the
+All additive. The maintained, per-feature tables with per-file reasoning are
+under [../deviations/](../deviations/), indexed from
+[DEVIATION-FROM-CORE.md](../DEVIATION-FROM-CORE.md) — that's the
 authoritative list; the feature documents here explain the reasoning behind
 those deviations rather than cataloguing them.
 

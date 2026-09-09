@@ -45,6 +45,13 @@ export type DesignerBrowserSplitProps = {
   maxWidth?: number
   initialWidth?: number
   /**
+   * Whether the right-hand pane is shown at all. Fully controlled by the
+   * host — this component has no internal show/hide state, only width.
+   * Defaults to `true` so existing callers keep the current always-on
+   * behavior.
+   */
+  visible?: boolean
+  /**
    * Called with a formatted text reference (source location, stable
    * identifier, or CSS path) when a designer picks an element in the
    * preview. Webview mode only — native mode has no picking IPC surface.
@@ -151,32 +158,34 @@ export function DesignerBrowserSplit(props: DesignerBrowserSplitProps) {
   return (
     <div class="relative flex h-full w-full min-w-0 overflow-hidden">
       <div class="relative flex h-full min-w-0 flex-1 flex-col overflow-hidden">{props.children}</div>
-      <div
-        class="relative h-full shrink-0 border-l border-border-weaker-base bg-background-base"
-        style={{ width: `${width()}px` }}
-      >
-        <Show when={DESIGNER_BROWSER_MODE === "webview"} fallback={<div ref={pane} class="absolute inset-0" />}>
-          <webview
-            ref={(el: HTMLElement) => {
-              webview = el as DesignerBrowserWebviewElement
-              el.addEventListener("dom-ready", handleDomReady)
-            }}
-            class="absolute inset-0 h-full w-full"
-            src={DESIGNER_BROWSER_HOME_URL}
-            partition={DESIGNER_BROWSER_PARTITION}
-          />
-          <button
-            type="button"
-            class="absolute right-2 top-2 z-10 rounded-md border border-border-weaker-base bg-background-base px-2 py-1 text-xs font-medium text-text-base shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
-            classList={{ "border-border-interactive-base text-text-interactive-base": picking() }}
-            disabled={!guestReady()}
-            onClick={togglePick}
-          >
-            {picking() ? "Cancel pick" : "Pick element"}
-          </button>
-        </Show>
-        <ResizeHandle direction="horizontal" edge="start" size={width()} min={minWidth} max={maxWidth()} onResize={resize} />
-      </div>
+      <Show when={props.visible ?? true}>
+        <div
+          class="relative h-full shrink-0 border-l border-border-weaker-base bg-background-base"
+          style={{ width: `${width()}px` }}
+        >
+          <Show when={DESIGNER_BROWSER_MODE === "webview"} fallback={<div ref={pane} class="absolute inset-0" />}>
+            <webview
+              ref={(el: HTMLElement) => {
+                webview = el as DesignerBrowserWebviewElement
+                el.addEventListener("dom-ready", handleDomReady)
+              }}
+              class="absolute inset-0 h-full w-full"
+              src={DESIGNER_BROWSER_HOME_URL}
+              partition={DESIGNER_BROWSER_PARTITION}
+            />
+            <button
+              type="button"
+              class="absolute right-2 top-2 z-10 rounded-md border border-border-weaker-base bg-background-base px-2 py-1 text-xs font-medium text-text-base shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
+              classList={{ "border-border-interactive-base text-text-interactive-base": picking() }}
+              disabled={!guestReady()}
+              onClick={togglePick}
+            >
+              {picking() ? "Cancel pick" : "Pick element"}
+            </button>
+          </Show>
+          <ResizeHandle direction="horizontal" edge="start" size={width()} min={minWidth} max={maxWidth()} onResize={resize} />
+        </div>
+      </Show>
     </div>
   )
 }

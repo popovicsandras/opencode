@@ -1,4 +1,4 @@
-import { createEffect, createMemo, For, Show, type Accessor, type JSX } from "solid-js"
+import { createEffect, createMemo, createSignal, For, onCleanup, onMount, Show, type Accessor, type JSX } from "solid-js"
 import { FileIcon } from "@opencode-ai/ui/file-icon"
 import { Icon } from "@opencode-ai/ui/icon"
 import { IconButton } from "@opencode-ai/ui/icon-button"
@@ -10,6 +10,11 @@ import { IconButtonV2 } from "@opencode-ai/ui/v2/icon-button-v2"
 import { KeybindV2 } from "@opencode-ai/ui/v2/keybind-v2"
 import { MenuV2 } from "@opencode-ai/ui/v2/menu-v2"
 import { TooltipV2 } from "@opencode-ai/ui/v2/tooltip-v2"
+import {
+  DESIGNER_BROWSER_VISIBILITY_EVENT,
+  notifyDesignerBrowserToggle,
+  readDesignerBrowserVisibilityDetail,
+} from "@opencode-ai/ui/designer-browser-events"
 import { AttachmentCardV2 } from "../attachment-card-v2"
 import { CommentCardV2 } from "../comment-card-v2"
 import { typeLabel } from "../../../components/message-file"
@@ -42,6 +47,7 @@ export type PromptInputV2Props = {
   class?: string
   modelControl?: JSX.Element
   variantControlVisible?: boolean
+  showBrowserToggle?: boolean
   attachKeybind?: string[]
   attachShortcut?: string
 }
@@ -254,15 +260,20 @@ export function PromptInputV2(props: PromptInputV2Props) {
               )}
             </Show>
           </div>
-          <PromptInputV2SubmitButton
-            mode={state.mode}
-            stopping={view.submit.stopping()}
-            disabled={!props.controller.canSubmit()}
-            sendLabel={i18n.t("ui.promptInput.send")}
-            stopLabel={i18n.t("ui.promptInput.stop")}
-            onSubmit={props.controller.submit}
-            onStop={props.controller.stop}
-          />
+          <div class="flex items-center gap-2">
+            <Show when={props.showBrowserToggle}>
+              <PromptInputV2BrowserToggleButton />
+            </Show>
+            <PromptInputV2SubmitButton
+              mode={state.mode}
+              stopping={view.submit.stopping()}
+              disabled={!props.controller.canSubmit()}
+              sendLabel={i18n.t("ui.promptInput.send")}
+              stopLabel={i18n.t("ui.promptInput.stop")}
+              onSubmit={props.controller.submit}
+              onStop={props.controller.stop}
+            />
+          </div>
         </div>
       </form>
     </div>
@@ -666,6 +677,38 @@ export function PromptInputV2Popover(props: {
         </For>
       </Show>
     </div>
+  )
+}
+
+export function PromptInputV2BrowserToggleButton() {
+  const i18n = useI18n()
+  const [visible, setVisible] = createSignal(true)
+
+  onMount(() => {
+    const handleVisibility = (event: Event) => {
+      const detail = readDesignerBrowserVisibilityDetail(event)
+      if (detail) setVisible(detail.visible)
+    }
+    window.addEventListener(DESIGNER_BROWSER_VISIBILITY_EVENT, handleVisibility)
+    onCleanup(() => window.removeEventListener(DESIGNER_BROWSER_VISIBILITY_EVENT, handleVisibility))
+  })
+
+  const label = () => (visible() ? i18n.t("ui.promptInput.hideBrowser") : i18n.t("ui.promptInput.showBrowser"))
+
+  return (
+    <TooltipV2 placement="top" value={label()}>
+      <IconButtonV2
+        data-action="prompt-browser-toggle"
+        type="button"
+        variant="ghost-muted"
+        size="large"
+        state={visible() ? "pressed" : undefined}
+        aria-pressed={visible()}
+        aria-label={label()}
+        icon={<IconV2 name="monitor" />}
+        onClick={() => notifyDesignerBrowserToggle()}
+      />
+    </TooltipV2>
   )
 }
 

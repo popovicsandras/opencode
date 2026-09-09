@@ -5,7 +5,9 @@ own document under [intent/](intent/); this page carries only the framing and a
 one-paragraph pointer per feature. Keep it that way — detail belongs in the
 feature document, not here.
 
-Technical counterpart: [architecture.md](architecture.md). Documentation rules:
+Technical counterpart: [architecture.md](architecture.md). Every upstream file
+a feature had to touch to exist is tracked separately, in
+[DEVIATION-FROM-CORE.md](DEVIATION-FROM-CORE.md). Documentation rules:
 [AGENTS.md](AGENTS.md).
 
 ## The short version
@@ -29,11 +31,11 @@ shape of the experience before wiring it to a real prototype.
 
 ## Features
 
-| Feature | Status | Product intent | Technical |
-| --- | --- | --- | --- |
-| Split view | Built (prototype) | [intent/split-view.md](intent/split-view.md) | [architecture/split-view.md](architecture/split-view.md) |
-| Preview pane | Built (prototype, placeholder destination) | [intent/preview-pane.md](intent/preview-pane.md) | [architecture/preview-pane.md](architecture/preview-pane.md) |
-| Element picker | Built (prototype) | [intent/element-picker.md](intent/element-picker.md) | [architecture/element-picker.md](architecture/element-picker.md) |
+| Feature | Status | Product intent | Technical | Deviations |
+| --- | --- | --- | --- | --- |
+| Split view | Built (prototype) | [intent/split-view.md](intent/split-view.md) | [architecture/split-view.md](architecture/split-view.md) | [deviations/split-view.md](deviations/split-view.md) |
+| Preview pane | Built (prototype, placeholder destination) | [intent/preview-pane.md](intent/preview-pane.md) | [architecture/preview-pane.md](architecture/preview-pane.md) | [deviations/preview-pane.md](deviations/preview-pane.md) |
+| Element picker | Built (prototype) | [intent/element-picker.md](intent/element-picker.md) | [architecture/element-picker.md](architecture/element-picker.md) | [deviations/element-picker.md](deviations/element-picker.md) |
 
 ### [Split view](intent/split-view.md)
 
@@ -46,7 +48,8 @@ and a width the app remembers.
 A live, interactive view of the thing being designed — not a web browser. One
 destination, steered by the agent rather than chosen by the designer, with no
 address bar and nothing that invites browsing. Every app surface must paint
-above it.
+above it. The designer can hide and re-show it from a button in the chat
+composer, to reclaim width for the chat.
 
 ### [Element picker](intent/element-picker.md)
 
